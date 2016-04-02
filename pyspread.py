@@ -140,7 +140,7 @@ class Sheet:
 	def name(self):
 		return self._name
 
-	@setter.name
+	@name.setter
 	def name(self, name):
 		self._name = name
 		self._check_exists()
