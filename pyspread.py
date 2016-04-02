@@ -55,13 +55,26 @@ class User:
 
 	def open_by_key(self, key):
 		"""Same as open_by_url, but takes the spreadsheet's key instead of the full URL.
-		eg, for the url https://docs.google.com/spreadsheets/d/1eevXLI0wlE05lG9hTV_TS288An3vHB6danVWv9thiJI
+		eg, for the url https://docs.google.com/spreadsheets/d/1eevXLI0wlE05lG9hTV_TS288An3vHB6danVWv9thiJI/edit
 		 the key would be 1eevXLI0wlE05lG9hTV_TS288An3vHB6danVWv9thiJI
 		"""
 		return open_by_url("https://docs.google.com/spreadsheets/d/" + key + "/edit")
 
 class Spreadsheet:
+	"""A class representing a spreadsheet.  Mostly used to create sheet objects."""
 	def __init__(self, url, user):
+		"""Initialize a new Spreadsheet object.
+
+		Params:
+			url: the URL of the Spreadsheet to open.
+			user: the User object used to create this Spreadsheet
+
+		Possible errors:
+			Raises a ValueError if the Spreadsheet does not exist or the user has no permission.
+
+		Note: this constructor should not be called by the user.  The user should
+		instead call one of User's open methods, which will return a new Spreadsheet.
+		"""
 		self._url = url
 		self.user = user
 		self._check_exists_and_permissions()
@@ -81,7 +94,7 @@ class Spreadsheet:
 
 	def _check_exists_and_permissions(self):
 		"""Checks to make sure that url passed into the constructor actually links
-		to a real spreadsheet
+		to a real spreadsheet that the user has access to.
 
 		Possible errors:
 			Raises a ValueError if the Spreadsheet does not exist or the user has no permission.
@@ -95,6 +108,11 @@ class Spreadsheet:
 			raise ValueError('Sheet does not exist or user does not have permission')
 
 	def get_sheet_names(self):
+		"""Returns a list of all the names of sheets in this spreadsheet.
+
+		Returns:
+			A list containing all the names of sheets.
+		"""
 		return _call_script(self.service, "getSheetNames", [self.url])
 
 	def get_sheet(self, sheet_name):
@@ -106,7 +124,6 @@ class Spreadsheet:
 
 		Possible errors:
 			Raises a ValueError if the sheet does not exist.
-			Raises a ScriptCallError if the script crashes before running.
 
 		Returns:
 			A new sheet object.
@@ -128,23 +145,26 @@ class Sheet:
 		"""Initialize a new sheet object.
 
 		Params:
-			sheet_name: the name of the sheet you want to open
-			parent_spreadsheet: the spreadsheet object corresponding to the spreadsheet this sheet is a part of
+			sheet_name: the name of the sheet you want to open.
+			parent_spreadsheet: the Spreadsheet object used to create this sheet.
 
 		Possible errors:
 			Raises a ValueError if the sheet does not exist.
-			Raises a ScriptCallError if the call to the script fails.
 
 		Note: This constructor should not be called by the user.  The user should instead call one of the 
 		open sheet functions from a spreadsheet object, which will then call this constructor.
 		"""
 		self._name = sheet_name
-		self.spreadsheet = parent_spreadsheet
+		self._spreadsheet = parent_spreadsheet
 		self._check_exists()
 
 	@property
 	def name(self):
 		return self._name
+
+	@property
+	def spreadsheet(self):
+		return self._spreadsheet
 
 	@name.setter
 	def name(self, name):
@@ -158,7 +178,6 @@ class Sheet:
 
 		Possible errors:
 			Raises a ValueError if the sheet does not exist.
-			Raises a ScriptCallError if the call to the script fails.
 
 		Note: This should not be called by the user, and should only be called
 		internally from the constructor.
@@ -169,42 +188,84 @@ class Sheet:
 			raise ValueError("Spreadsheet at URL " + self.url + " does not have a sheet called " + self.name + ".")
 
 	def get_range(self, start_row, start_col, num_rows, num_cols):
-		"""
-		Returns a matrix (python list of lists) of values of the given selection
-		GAS fn signature: getMatrix(url, name, rOffset, cOffset, nRows, nCols)
+		"""Returns the value within the range (start_row, start_col) to (start_row + num_rows, start_col + num_cols)
+		Note that, to stay consistent with the spreadsheet, rows and columns are 1 indexed.
+
+		Params:
+			start_row: The first row to pull data from
+			start_col: The first column to pull data from
+			num_rows: The number of rows to pull from
+			num_cols: The number of columns to pull from
+
+		Returns:
+			A 2D list with the sheet's values, where each sublist corresponds to a row in the sheet.
+			  This means that the list will contain num_rows sublists, each containing num_cols values.
+			  Empty cells are represented by the empty string.
 		"""
 		return _call_script(self.service, 'getMatrix', [self.url, self.name, start_row, start_col, num_rows, num_cols])
 
 	def get_column(self, col):
-		"""
-		Returns a column (python list) of given parameters
-		GAS fn signature: getColumn(url, name, c)
+		"""Returns the values stored in column col.
+
+		Params:
+			col: The column to get data from
+
+		Returns:
+			A list containing all the values stored in that column.
+			  This list only includes values up to the last cell in the column with data in it,
+			  so an empty column will return an empty list.
 		"""
 		col = _call_script(self.service, 'getColumn', [self.url, self.name, col])
 		col = list(tuple(zip(*col))[0])
 		return col
 
 	def get_row(self, row):
-		"""
-		Returns a row (python list) of given parameters
-		GAS fn signature: getRow(url, name, r, cOffset, nCols)
+		"""Returns the values stored in row row.
+
+		Params:
+			row: The row to get data from
+
+		Returns:
+			A list containing all the values stored in that row.
+			  This list only includes values up to the last cell in the row with data in it,
+			  so an empty row will return an empty list.
 		"""
 		return _call_script(self.service, 'getRow', [self.url, self.name, row])
 
 	def get_cell_value(self, row, col):
-		"""
-		Returns the value of the given cell
-		GAS fn signature: getCellValue(url, name, r, c)
+		"""Returns the values stored in the cell at row row and column col.
+
+		Params:
+			row: The row the cell is in
+			col: The column the cell is in
+
+		Returns:
+			The value stored in that cell.  Empty cells will return the empty string.
 		"""
 		return _call_script(self.service, 'getCellValue', [self.url, self.name, row, col])
 
 	def set_cell_value(self, row, col, val):
-		"""Sets the value of the cell to val"""
+		"""Sets the value of the cell at (row, col) to val.
+
+		Params:
+			row: The row the cell is in
+			col: The column the cell is in
+			val: The value to set the cell to
+		"""
 		_call_script(self.service, "setCellValue", [self.url, self.name, row, col, val])
 
 	def set_range(self, start_row, start_col, num_rows, num_cols, vals):
 		"""Sets the values of the cells in the range to the values specified in vals.
-		Note that vals should be a 2D list, where each sub list is a row.
+
+		Params:
+			start_row: The first row to add data to
+			start_col: The first column to add data to
+			num_rows: The number of rows to add to
+			num_cols: The number of columns to add to
+			vals: A 2D list of values, where each sub list is a row
+
+		Possible errors:
+			Raises a ValueError if vals has the wrong dimensions.
 		"""
 		if len(vals) != num_rows:
 			raise ValueError("set_range expected vals with " + num_rows + " rows, but found " + len(vals) + ".")
@@ -223,9 +284,19 @@ class Sheet:
 		return _call_script(self.service, "getMaxCol", [self.url, self.name])
 
 	def insert_rows_at_end(self, n):
+		"""Inserts n new rows at the end of the sheet.
+
+		Params:
+			n: The number of new rows to insert
+		"""
 		return _call_script(self.service, "insertRowAtEnd", [self.url, self.name, n])
 
 	def insert_cols_at_end(self, n):
+		"""Inserts n new columns at the right of the sheet.
+
+		Params:
+			n: The number of new columns to insert
+		"""
 		return _call_script(self.service, "insertColAtEnd", [self.url, self.name, n])
 
 
