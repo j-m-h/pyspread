@@ -7,6 +7,43 @@ class scriptRuntimeError(Exception):
 	"""An error raised by the script during execution."""
 	pass # everything can be inherited from Exception
 
+class sheet:
+	"""Class representing a sheet within a spreadsheet."""
+	@property
+	def service(self):
+		return self.spreadsheet.user.service
+	@property:
+	def url(self):
+		return self.spreadsheet.url
+
+	def __init__(self, sheet_name, parent_spreadsheet):
+		"""Initialize a new sheet object.
+
+		Params:
+			sheet_name: the name of the sheet you want to open
+			parent_spreadsheet: the spreadsheet object corresponding to the spreadsheet this sheet is a part of
+
+		Possible errors:
+			Raises a valueError if the sheet does not exist.
+
+		Note: This constructor should not be called by the user.  The user should instead call one of the 
+		open sheet functions from a spreadsheet object, which will then call this constructor.
+		"""
+		self.name = sheet_name
+		self.spreadsheet = parent_spreadsheet
+
+	def _check_exists(self):
+		"""Checks to make sure that name passed into the constructor is actually a
+		sheet in the parent spreadsheet.
+
+		Possible errors:
+			Raises a valueError if the sheet does not exist.
+
+		Note: This should not be called by the user, and should only be called
+		internally from the constructor.
+		"""
+		_call_script(self.service, "checkSheetExists", [self.url, self.service])
+
 
 def _call_script(service, function_name, params):
 	"""Calls a given function from the background google apps script.
