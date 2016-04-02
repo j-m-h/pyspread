@@ -1,13 +1,42 @@
 from apiclient import errors
 
-class scriptCallError(Exception):
+class ScriptCallError(Exception):
 	"""An error caused by the script failing to run."""
 	pass # everything can be inherited from Exception
-class scriptRuntimeError(Exception):
+class ScriptRuntimeError(Exception):
 	"""An error raised by the script during execution."""
 	pass # everything can be inherited from Exception
 
-class sheet:
+class User:
+	def __init__(self, service):
+		self.service = service
+
+class Spreadsheet:
+	def __init__(self, url, user):
+		self.url = url
+		self.user = user
+
+	def _check_exists_and_permissions(self):
+		"""Checks to make sure that url passed into the constructor actually links
+		to a real spreadsheet
+
+		Possible errors:
+			Raises a ValueError if the Spreadsheet does not exist or the user has no permission.
+
+		Note: This should not be called by the user, and should only be called
+		internally from the constructor.
+		"""
+		try:
+			_call_script(self.service, "checkSSExists", [self.url])
+		except(scriptRuntimeError):
+			raise ValueError('Sheet does not exist or user does not have permission')
+
+	def get_sheet_names(self, url):
+		return _call_script(self.service, "getSheetNames", [self.url])
+
+
+
+class Sheet:
 	"""Class representing a sheet within a spreadsheet."""
 	@property
 	def service(self):
@@ -24,13 +53,16 @@ class sheet:
 			parent_spreadsheet: the spreadsheet object corresponding to the spreadsheet this sheet is a part of
 
 		Possible errors:
-			Raises a valueError if the sheet does not exist.
+			Raises a ValueError if the sheet does not exist.
+			Raises a scriptCallError - doesn't have to do with the existence of the sheet
 
 		Note: This constructor should not be called by the user.  The user should instead call one of the 
 		open sheet functions from a spreadsheet object, which will then call this constructor.
 		"""
 		self.name = sheet_name
 		self.spreadsheet = parent_spreadsheet
+		self._check_exists()
+
 
 	def _check_exists(self):
 		"""Checks to make sure that name passed into the constructor is actually a
@@ -42,7 +74,28 @@ class sheet:
 		Note: This should not be called by the user, and should only be called
 		internally from the constructor.
 		"""
-		_call_script(self.service, "checkSheetExists", [self.url, self.service])
+		try:
+			_call_script(self.service, "checkSheetExists", [self.url, self.name])
+		except(scriptRuntimeError):
+			raise ValueError('Sheet does not exist')
+
+	def get_matrix(self, r_offset, c_offset, n_rows, n_cols):
+		"""
+		Returns a matrix (python list of lists) of values of the given selection
+		"""
+		return _call_script(self.service, 'getRow', [self.url, self.name, r_offset, c_offset, n_rows, n_cols])
+
+	def get_column(self, c, r_offset, n_rows):
+		"""
+		Returns a column (python list) of given parameters
+		"""
+		return _call_script(self.service, 'getColumn', [self.url, self.name, c, r_offset, n_rows])
+
+	def get_cell_value(self, r, c):
+		return _call_script(self.service, 'getCellValue', [self.url, self.name r,c])
+
+
+
 
 
 def _call_script(service, function_name, params):
