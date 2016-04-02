@@ -82,6 +82,22 @@ class Spreadsheet:
 	def get_sheet_names(self, url):
 		return _call_script(self.service, "getSheetNames", [self.url])
 
+	def get_sheet(self, sheet_name):
+		"""Returns a sheet object corresponding to the sheet on the current
+		spreadsheet with the name sheet_name.
+
+		Params:
+			sheet_name: the name of the sheet to find.
+
+		Possible errors:
+			Raises a ValueError if the sheet does not exist.
+			Raises a ScriptCallError if the script crashes before running.
+
+		Returns:
+			A new sheet object.
+		"""
+		return Sheet(sheet_name, self)
+
 
 
 class Sheet:
