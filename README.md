@@ -1,6 +1,8 @@
 # pyspread
 A utility for writing to google spreadsheets from Python
 
+GAScript code can be found [here](https://script.google.com/d/1FRsJtZnBumIjvsSxPOJ86S_eTpl-zPqsHtoCpjuO7cH7QiZMjIh_Ddn7/edit?usp=sharing_eid&ts=56ff73f5).
+
 ### Dependencies
 You must have the python libraries apiclient and httplib2 installed.
 
