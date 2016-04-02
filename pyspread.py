@@ -202,7 +202,11 @@ class Sheet:
 			  This means that the list will contain num_rows sublists, each containing num_cols values.
 			  Empty cells are represented by the empty string.
 		"""
-		return _call_script(self.service, 'getMatrix', [self.url, self.name, start_row, start_col, num_rows, num_cols])
+		vals =  _call_script(self.service, 'getMatrix', [self.url, self.name, start_row, start_col, num_rows, num_cols])
+		for i in range(len(vals)):
+			for j in range(len(vals[i])):
+				vals[i][j] = str(vals[i][j]) # Cast any chars to strings
+		return vals
 
 	def get_column_values(self, col):
 		"""Returns the values stored in column col.
@@ -216,8 +220,10 @@ class Sheet:
 			  so an empty column will return an empty list.
 		"""
 		col = _call_script(self.service, 'getColumn', [self.url, self.name, col])
+		if col == [[]]:
+			return []
 		col = list(tuple(zip(*col))[0])
-		return col
+		return [str(e) for e in col] # cast any chars to strings
 
 	def get_row_values(self, row):
 		"""Returns the values stored in row row.
@@ -230,7 +236,8 @@ class Sheet:
 			  This list only includes values up to the last cell in the row with data in it,
 			  so an empty row will return an empty list.
 		"""
-		return _call_script(self.service, 'getRow', [self.url, self.name, row])
+		vals = _call_script(self.service, 'getRow', [self.url, self.name, row])
+		return [str(e) for e in vals] # cast any chars to strings
 
 	def get_cell_value(self, row, col):
 		"""Returns the values stored in the cell at row row and column col.
@@ -242,7 +249,7 @@ class Sheet:
 		Returns:
 			The value stored in that cell.  Empty cells will return the empty string.
 		"""
-		return _call_script(self.service, 'getCellValue', [self.url, self.name, row, col])
+		return str(_call_script(self.service, 'getCellValue', [self.url, self.name, row, col]))
 
 	def set_cell_value(self, row, col, val):
 		"""Sets the value of the cell at (row, col) to val.
