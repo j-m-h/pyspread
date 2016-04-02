@@ -196,6 +196,22 @@ class Sheet:
 		"""
 		return _call_script(self.service, 'getCellValue', [self.url, self.name, row, col])
 
+	def set_cell_value(self, row, col, val):
+		"""Sets the value of the cell to val"""
+		_call_script(self.service, "setCellValue", [self.url, self.name, row, col, val])
+
+	def set_range(self, start_row, start_col, num_rows, num_cols, vals):
+		"""Sets the values of the cells in the range to the values specified in vals.
+		Note that vals should be a 2D list, where each sub list is a row.
+		"""
+		if len(vals) != num_rows:
+			raise ValueError("set_range expected vals with " + num_rows + " rows, but found " + len(vals) + ".")
+		for row in range(num_rows):
+			curr_len = len(vals[row])
+			if curr_len != num_cols:
+				raise ValueError("set_range expected vals with " + num_cols + " cols, but row " + row + " had " + curr_len + ".")
+		_call_script(self.service, "setRange", [self.url, self.name, start_row, start_col, num_rows, num_cols, vals])
+
 
 
 
