@@ -18,9 +18,9 @@ try:
 except ImportError:
     flags = None
 
-SCOPES = ['https://www.googleapis.com/auth/drive', "https://www.googleapis.com/auth/spreadsheets"]
+SCOPES = 'https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/spreadsheets'
 CLIENT_SECRET_FILE = 'client_secret.json'
-APPLICATION_NAME = "Python Spreadsheet API"
+APPLICATION_NAME = "PySpread"
 
 def get_credentials():
     """Gets valid user credentials from storage.
@@ -36,13 +36,13 @@ def get_credentials():
     if not os.path.exists(credential_dir):
         os.makedirs(credential_dir)
     credential_path = os.path.join(credential_dir,
-                                   'pyspread_test.json')
+                                   'script-python-quickstart.json')
 
     store = oauth2client.file.Storage(credential_path)
     credentials = store.get()
-    if True or not credentials or credentials.invalid:
+    if not credentials or credentials.invalid:
         flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES)
-        flow.user_agent = ""
+        flow.user_agent = APPLICATION_NAME
         if flags:
             credentials = tools.run_flow(flow, store, flags)
         else: # Needed only for compatibility with Python 2.6
@@ -58,9 +58,12 @@ sys.stdout.flush()
 user = pyspread.authorize(credentials)
 print("Got user")
 sys.stdout.flush()
-ss = user.open_by_url("https://docs.google.com/spreadsheets/d/1VB8V2MdhyBQdvxMxssjGkk_8Yq9OY60VtNiOfTJXJsc/edit#gid=0")
+ss = user.open_by_url('https://docs.google.com/spreadsheets/d/1LIDeC3yZCF43D4z3EPusOwOxqjpAFBcoRfF8csnySPk')
 print("Got ss")
 sys.stdout.flush()
-sheet = ss.get_sheet("Sheet1")
+sheet = ss.get_sheet("Draft1")
 print("Got sheet")
 sys.stdout.flush()
+#get_column(self, c, r_offset, n_rows)
+result = sheet.get_column(1,2,10)
+print(result)

@@ -62,7 +62,7 @@ class User:
 
 class Spreadsheet:
 	def __init__(self, url, user):
-		self.url = url
+		self._url = url
 		self.user = user
 
 	@property
@@ -73,6 +73,10 @@ class Spreadsheet:
 	def url(self, url):
 		self._url = url
 		self._check_exists_and_permissions()
+
+	@property
+	def service(self):
+		return self.user.service
 
 	def _check_exists_and_permissions(self):
 		"""Checks to make sure that url passed into the constructor actually links
@@ -214,12 +218,13 @@ def _call_script(service, function_name, params):
 	Note that this function should only be called internally.
 	"""
 	# Create an execution request.
-	request = {"function": function_name, "parameters": params, "devMode": True}
+	request = {"function": function_name, "parameters": params}
 	# NOTE: Turn OFF devMode once this is out of the testing phase
-
+	print(params)
+	print(function_name)
 	try:
 		# Make the API request.
-		response = service.scripts().run(body=request, scriptId="Myh_8aCv3rKMhn_T-KdkXNUDr5LHPQgOS").execute()
+		response = service.scripts().run(body=request, scriptId="Mp_xsj65X7Eguu6LJl6VeZkDr5LHPQgOS").execute()
 
 		if 'error' in response:
 			# The API executed, but the script returned an error.
@@ -234,7 +239,9 @@ def _call_script(service, function_name, params):
 			raise ScriptRuntimeError("Error while calling function " + function_name + " with parameters " + str(params) + "\nError message: " + error_message)
 		else:
 			# means the request went through without error, so return what the request returned
-			return response['response']['result']
+			#print(response)
+			if 'result' in response['response']:
+				return response['response']['result']
 
 	except errors.HttpError as e:
 		# The API encountered a problem before the script started executing.
