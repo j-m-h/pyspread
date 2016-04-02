@@ -13,7 +13,7 @@ You must have the python libraries apiclient and httplib2 installed.
   * Now that you have a sheet, you can start using any of the public facing methods (described below).
 
 An example of how to use pyspread, once you have your credentials:
-'''
+```
 user = pyspread.authorize(credentials) # Create the User object
 ss = user.open_by_key("1VB8V2MdhyBQdvxMxssjGkk_8Yq9OY60VtNiOfTJXJsc") # Create the Spreadsheet object
 sheet_names = ss.get_sheet_names() # Fetch all sheet names from the Spreadsheet
@@ -22,7 +22,7 @@ for(name in sheet_names):
 	print("   " + name)
 sheet = ss.get_sheet("Example Sheet") # Create the Sheet object
 print(sheet.get_cell_value(1, 2)) # Print out the value in cell B1
-'''
+```
 
 ### Important notes
 * In order to stay consistent with the indexing of the spreadsheet, all row and column values are 1-indexed, unless otherwise noted.
