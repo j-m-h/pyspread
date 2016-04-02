@@ -58,7 +58,7 @@ class User:
 		eg, for the url https://docs.google.com/spreadsheets/d/1eevXLI0wlE05lG9hTV_TS288An3vHB6danVWv9thiJI
 		 the key would be 1eevXLI0wlE05lG9hTV_TS288An3vHB6danVWv9thiJI
 		"""
-		return open_by_url("https://docs.google.com/spreadsheets/d/" + key)
+		return open_by_url("https://docs.google.com/spreadsheets/d/" + key + "/edit")
 
 class Spreadsheet:
 	def __init__(self, url, user):
