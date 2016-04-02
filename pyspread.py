@@ -94,7 +94,7 @@ class Spreadsheet:
 		except(ScriptRuntimeError):
 			raise ValueError('Sheet does not exist or user does not have permission')
 
-	def get_sheet_names(self, url):
+	def get_sheet_names(self):
 		return _call_script(self.service, "getSheetNames", [self.url])
 
 	def get_sheet(self, sheet_name):
@@ -211,6 +211,14 @@ class Sheet:
 			if curr_len != num_cols:
 				raise ValueError("set_range expected vals with " + num_cols + " cols, but row " + row + " had " + curr_len + ".")
 		_call_script(self.service, "setRange", [self.url, self.name, start_row, start_col, num_rows, num_cols, vals])
+
+	def get_max_row(self):
+		"""Returns the last row in the spreadsheet with any values in it."""
+		return _call_script(self.service, "getMaxRow", [self.url, self.name])
+
+	def get_max_col(self):
+		"""Returns the last col in the spreadsheet with any values in it."""
+		return _call_script(self.service, "getMaxCol", [self.url, self.name])
 
 
 
