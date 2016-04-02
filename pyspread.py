@@ -21,6 +21,7 @@ def authorize(credentials):
 	"""
 	http = credentials.authorize(httplib2.Http())
 	service = discovery.build('script', 'v1', http=http)
+	return User(service)
 
 
 class User:
