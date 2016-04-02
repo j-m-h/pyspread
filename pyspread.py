@@ -64,6 +64,15 @@ class Spreadsheet:
 		self.url = url
 		self.user = user
 
+	@property
+	def url(self):
+		return self._url
+
+	@url.setter
+	def url(self, url):
+		self._url = url
+		self._check_exists_and_permissions()
+
 	def _check_exists_and_permissions(self):
 		"""Checks to make sure that url passed into the constructor actually links
 		to a real spreadsheet
@@ -123,8 +132,17 @@ class Sheet:
 		Note: This constructor should not be called by the user.  The user should instead call one of the 
 		open sheet functions from a spreadsheet object, which will then call this constructor.
 		"""
-		self.name = sheet_name
+		self._name = sheet_name
 		self.spreadsheet = parent_spreadsheet
+		self._check_exists()
+
+	@property
+	def name(self):
+		return self._name
+
+	@setter.name
+	def name(self, name):
+		self._name = name
 		self._check_exists()
 
 
@@ -170,7 +188,7 @@ class Sheet:
 		Returns the value of the given cell
 		GAS fn signature: getCellValue(url, name, r, c)
 		"""
-		return _call_script(self.service, 'getCellValue', [self.url, self.name r,c])
+		return _call_script(self.service, 'getCellValue', [self.url, self.name, r,c])
 
 
 
