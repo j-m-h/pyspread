@@ -60,13 +60,11 @@ print(sheet.get_cell_value(1, 2)) # Print out the value in cell B1
   Returns: A 2D list with the sheet's values, where each sublist corresponds to a row in the sheet.  
 
 `get_column_values(col)`: Used to get a list of values from the column col.  
-  For example, calling with parameter 3 will return all the values in column C, up to the last cell with anything in it.  
-    This means that an empty column will give back an empty list.  
+  For example, calling with parameter 3 will return all the values in column C, up to the last cell with anything in it.  This means that an empty column will give back an empty list.  
   Returns: A list containing all the values stored in the column.  
 
 `get_row_values(row)`: Used to get a list of values from the row row.  
-  For example, calling with parameter 2 will return all the values in row 2, up to the last cell with anything in it.  
-    This means that an empty row will give back an empty list.  
+  For example, calling with parameter 2 will return all the values in row 2, up to the last cell with anything in it.  This means that an empty row will give back an empty list.  
   Returns: A list containing all the values stored in the row.  
 
 `get_cell_value(row, col)`: Used to get the value from the cell in row row and column col.  
@@ -89,4 +87,4 @@ print(sheet.get_cell_value(1, 2)) # Print out the value in cell B1
 
 `insert_rows(n)`: Used to insert n rows to the bottom of the sheet.
 
-`insert_cols(n)`: Used to insert n columns to the bottom of the sheet.
+`insert_cols(n)`: Used to insert n columns to the right of the sheet.
