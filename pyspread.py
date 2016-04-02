@@ -187,7 +187,7 @@ class Sheet:
 		except(ScriptRuntimeError):
 			raise ValueError("Spreadsheet at URL " + self.url + " does not have a sheet called " + self.name + ".")
 
-	def get_range(self, start_row, start_col, num_rows, num_cols):
+	def get_range_values(self, start_row, start_col, num_rows, num_cols):
 		"""Returns the value within the range (start_row, start_col) to (start_row + num_rows, start_col + num_cols)
 		Note that, to stay consistent with the spreadsheet, rows and columns are 1 indexed.
 
@@ -204,7 +204,7 @@ class Sheet:
 		"""
 		return _call_script(self.service, 'getMatrix', [self.url, self.name, start_row, start_col, num_rows, num_cols])
 
-	def get_column(self, col):
+	def get_column_values(self, col):
 		"""Returns the values stored in column col.
 
 		Params:
@@ -219,7 +219,7 @@ class Sheet:
 		col = list(tuple(zip(*col))[0])
 		return col
 
-	def get_row(self, row):
+	def get_row_values(self, row):
 		"""Returns the values stored in row row.
 
 		Params:
@@ -254,7 +254,7 @@ class Sheet:
 		"""
 		_call_script(self.service, "setCellValue", [self.url, self.name, row, col, val])
 
-	def set_range(self, start_row, start_col, num_rows, num_cols, vals):
+	def set_range_values(self, start_row, start_col, num_rows, num_cols, vals):
 		"""Sets the values of the cells in the range to the values specified in vals.
 
 		Params:
@@ -283,7 +283,7 @@ class Sheet:
 		"""Returns the last col in the spreadsheet with any values in it."""
 		return _call_script(self.service, "getMaxCol", [self.url, self.name])
 
-	def insert_rows_at_end(self, n):
+	def insert_rows(self, n):
 		"""Inserts n new rows at the end of the sheet.
 
 		Params:
@@ -291,7 +291,7 @@ class Sheet:
 		"""
 		return _call_script(self.service, "insertRowAtEnd", [self.url, self.name, n])
 
-	def insert_cols_at_end(self, n):
+	def insert_cols(self, n):
 		"""Inserts n new columns at the right of the sheet.
 
 		Params:
