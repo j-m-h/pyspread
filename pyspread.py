@@ -165,7 +165,7 @@ class Sheet:
 		try:
 			_call_script(self.service, "checkSheetExists", [self.url, self.name])
 		except(ScriptRuntimeError):
-			raise ValueError("Spreadsheet at URL " + self.url + " does not have a sheet called " + sheet_name + ".")
+			raise ValueError("Spreadsheet at URL " + self.url + " does not have a sheet called " + self.name + ".")
 
 	def get_matrix(self, r_offset, c_offset, n_rows, n_cols):
 		"""
