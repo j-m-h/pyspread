@@ -131,18 +131,30 @@ class Sheet:
 	def get_matrix(self, r_offset, c_offset, n_rows, n_cols):
 		"""
 		Returns a matrix (python list of lists) of values of the given selection
+		GAS fn signature: getMatrix(url, name, rOffset, cOffset, nRows, nCols)
 		"""
 		return _call_script(self.service, 'getRow', [self.url, self.name, r_offset, c_offset, n_rows, n_cols])
 
 	def get_column(self, c, r_offset, n_rows):
 		"""
 		Returns a column (python list) of given parameters
+		GAS fn signature: getColumn(url, name, c, rOffset, nRows)
 		"""
 		return _call_script(self.service, 'getColumn', [self.url, self.name, c, r_offset, n_rows])
 
-	def get_cell_value(self, r, c):
-		return _call_script(self.service, 'getCellValue', [self.url, self.name r,c])
+	def get_row(self, r, c_offset, n_cols):
+		"""
+		Returns a row (python list) of given parameters
+		GAS fn signature: getRow(url, name, r, cOffset, nCols)
+		"""
+		return _call_script(self.service, 'getRow', [self.url, self.name, r, c_offset, n_cols])
 
+	def get_cell_value(self, r, c):
+		"""
+		Returns the value of the given cell
+		GAS fn signature: getCellValue(url, name, r, c)
+		"""
+		return _call_script(self.service, 'getCellValue', [self.url, self.name r,c])
 
 
 
