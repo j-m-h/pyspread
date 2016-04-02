@@ -219,7 +219,7 @@ def _call_script(service, function_name, params):
 
 	try:
 		# Make the API request.
-		response = service.scripts().run(body=request, scriptId=SCRIPT_ID).execute()
+		response = service.scripts().run(body=request, scriptId="Myh_8aCv3rKMhn_T-KdkXNUDr5LHPQgOS").execute()
 
 		if 'error' in response:
 			# The API executed, but the script returned an error.
@@ -231,11 +231,11 @@ def _call_script(service, function_name, params):
 				error_message += "\nStacktrace:"
 				for trace in error['scriptStackTraceElements']:
 					error_message += "\n\t{0}: {1}".format(trace['function'], trace['lineNumber'])
-			raise ScriptRuntimeError("Error while calling function " + function_name + " with parameters " + params + "\nError message: " + error_message)
+			raise ScriptRuntimeError("Error while calling function " + function_name + " with parameters " + str(params) + "\nError message: " + error_message)
 		else:
 			# means the request went through without error, so return what the request returned
 			return response['response']['result']
 
 	except errors.HttpError as e:
 		# The API encountered a problem before the script started executing.
-		raise ScriptCallError("Failed to call function " + function_name + " with parameters " + params + "\nError message: " + e.content)
+		raise ScriptCallError("Failed to call function " + function_name + " with parameters " + str(params) + "\nError message: " + e.content)
