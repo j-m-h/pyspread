@@ -133,7 +133,7 @@ class Sheet:
 		Returns a matrix (python list of lists) of values of the given selection
 		GAS fn signature: getMatrix(url, name, rOffset, cOffset, nRows, nCols)
 		"""
-		return _call_script(self.service, 'getRow', [self.url, self.name, r_offset, c_offset, n_rows, n_cols])
+		return _call_script(self.service, 'getMatrix', [self.url, self.name, r_offset, c_offset, n_rows, n_cols])
 
 	def get_column(self, c, r_offset, n_rows):
 		"""
