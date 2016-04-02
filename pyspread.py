@@ -167,33 +167,33 @@ class Sheet:
 		except(ScriptRuntimeError):
 			raise ValueError("Spreadsheet at URL " + self.url + " does not have a sheet called " + self.name + ".")
 
-	def get_matrix(self, r_offset, c_offset, n_rows, n_cols):
+	def get_range(self, start_row, start_col, num_rows, num_cols):
 		"""
 		Returns a matrix (python list of lists) of values of the given selection
 		GAS fn signature: getMatrix(url, name, rOffset, cOffset, nRows, nCols)
 		"""
-		return _call_script(self.service, 'getMatrix', [self.url, self.name, r_offset, c_offset, n_rows, n_cols])
+		return _call_script(self.service, 'getMatrix', [self.url, self.name, start_row, start_col, num_rows, num_cols])
 
-	def get_column(self, c, r_offset, n_rows):
+	def get_column(self, col):
 		"""
 		Returns a column (python list) of given parameters
-		GAS fn signature: getColumn(url, name, c, rOffset, nRows)
+		GAS fn signature: getColumn(url, name, c)
 		"""
-		return _call_script(self.service, 'getColumn', [self.url, self.name, c, r_offset, n_rows])
+		return _call_script(self.service, 'getColumn', [self.url, self.name, col])
 
-	def get_row(self, r, c_offset, n_cols):
+	def get_row(self, row):
 		"""
 		Returns a row (python list) of given parameters
 		GAS fn signature: getRow(url, name, r, cOffset, nCols)
 		"""
-		return _call_script(self.service, 'getRow', [self.url, self.name, r, c_offset, n_cols])
+		return _call_script(self.service, 'getRow', [self.url, self.name, row])
 
-	def get_cell_value(self, r, c):
+	def get_cell_value(self, row, col):
 		"""
 		Returns the value of the given cell
 		GAS fn signature: getCellValue(url, name, r, c)
 		"""
-		return _call_script(self.service, 'getCellValue', [self.url, self.name, r,c])
+		return _call_script(self.service, 'getCellValue', [self.url, self.name, row, col])
 
 
 
@@ -209,7 +209,7 @@ def _call_script(service, function_name, params):
 			For example, if your function takes parameters x and y, passing in params as [1, 7] will set x to 1 and y to 7.
 
 	Returns:
-		Whatever the google apps script returns if the run is successful
+		Whatever the google apps script returns if the run is successful (or nothing if the script returns nothing)
 
 	Possible errors:
 		Raises a ScriptCallError if the script errors before running
@@ -220,8 +220,6 @@ def _call_script(service, function_name, params):
 	# Create an execution request.
 	request = {"function": function_name, "parameters": params}
 	# NOTE: Turn OFF devMode once this is out of the testing phase
-	print(params)
-	print(function_name)
 	try:
 		# Make the API request.
 		response = service.scripts().run(body=request, scriptId="Mp_xsj65X7Eguu6LJl6VeZkDr5LHPQgOS").execute()
@@ -236,13 +234,14 @@ def _call_script(service, function_name, params):
 				error_message += "\nStacktrace:"
 				for trace in error['scriptStackTraceElements']:
 					error_message += "\n\t{0}: {1}".format(trace['function'], trace['lineNumber'])
-			raise ScriptRuntimeError("Error while calling function " + function_name + " with parameters " + str(params) + "\nError message: " + error_message)
+			raise ScriptRuntimeError("Error while calling function " + function_name + " with parameters (" 
+				+ ",".join(str(e) for e in params) + ")\nError message: " + error_message)
 		else:
 			# means the request went through without error, so return what the request returned
-			#print(response)
 			if 'result' in response['response']:
 				return response['response']['result']
 
 	except errors.HttpError as e:
 		# The API encountered a problem before the script started executing.
-		raise ScriptCallError("Failed to call function " + function_name + " with parameters " + str(params) + "\nError message: " + e.content)
+		raise ScriptCallError("Failed to call function " + function_name + " with parameters (" 
+			+ ",".join(str(e) for e in params) + ")\nError message: " + e.content)
