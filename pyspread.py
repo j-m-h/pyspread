@@ -7,9 +7,55 @@ class ScriptRuntimeError(Exception):
 	"""An error raised by the script during execution."""
 	pass # everything can be inherited from Exception
 
+def authorize(credentials):
+	"""Given a set of credentials, creates a service object and returns
+	a user object that has these credentials.
+
+	Params:
+		credentials: a set of OAuth2 credentials
+
+	Returns:
+		A User object, which will have the proper permissions.
+	"""
+	http = credentials.authorize(httplib2.Http())
+	service = discovery.build('script', 'v1', http=http)
+
+
 class User:
+	"""A class representing a user.  Used to create spreadsheet objects."""
 	def __init__(self, service):
+		"""Initialize a new User object.
+
+		Params:
+			service: a service object, returned by discovery.build
+
+		Note: this constructor should not be called by the user.  The user should
+		instead call pyspread.authorize, which will return a new User object.
+		"""
 		self.service = service
+
+	def open_by_url(self, url):
+		"""Open a spreadsheet by url, returning a new Spreadsheet object.
+
+		Params:
+			url: the URL of the spreadsheet to open.
+
+		Possible errors:
+			Raises a ValueError if the URL is invalid, or if the user doesn't
+			  have the proper permissions.
+			Raises a ScriptRuntimeError if the script fails to run properly.
+
+		Returns:
+			A new Spreadsheet object.
+		"""
+		return Spreadsheet(url, self)
+
+	def open_by_key(self, key):
+		"""Same as open_by_url, but takes the spreadsheet's key instead of the full URL.
+		eg, for the url https://docs.google.com/spreadsheets/d/1eevXLI0wlE05lG9hTV_TS288An3vHB6danVWv9thiJI
+		 the key would be 1eevXLI0wlE05lG9hTV_TS288An3vHB6danVWv9thiJI
+		"""
+		return open_by_url("https://docs.google.com/spreadsheets/d/" + key)
 
 class Spreadsheet:
 	def __init__(self, url, user):
@@ -41,7 +87,7 @@ class Sheet:
 	@property
 	def service(self):
 		return self.spreadsheet.user.service
-	@property:
+	@property
 	def url(self):
 		return self.spreadsheet.url
 
@@ -54,7 +100,7 @@ class Sheet:
 
 		Possible errors:
 			Raises a ValueError if the sheet does not exist.
-			Raises a scriptCallError - doesn't have to do with the existence of the sheet
+			Raises a scriptCallError if the call to the script fails.
 
 		Note: This constructor should not be called by the user.  The user should instead call one of the 
 		open sheet functions from a spreadsheet object, which will then call this constructor.
@@ -70,6 +116,7 @@ class Sheet:
 
 		Possible errors:
 			Raises a valueError if the sheet does not exist.
+			Raises a scriptCallError if the call to the script fails.
 
 		Note: This should not be called by the user, and should only be called
 		internally from the constructor.
@@ -77,7 +124,7 @@ class Sheet:
 		try:
 			_call_script(self.service, "checkSheetExists", [self.url, self.name])
 		except(scriptRuntimeError):
-			raise ValueError('Sheet does not exist')
+			raise ValueError("Spreadsheet at URL " + self.url + " does not have a sheet called " + sheet_name + ".")
 
 	def get_matrix(self, r_offset, c_offset, n_rows, n_cols):
 		"""
