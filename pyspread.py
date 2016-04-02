@@ -86,7 +86,7 @@ class Spreadsheet:
 		"""
 		try:
 			_call_script(self.service, "checkSSExists", [self.url])
-		except(scriptRuntimeError):
+		except(ScriptRuntimeError):
 			raise ValueError('Sheet does not exist or user does not have permission')
 
 	def get_sheet_names(self, url):
@@ -128,7 +128,7 @@ class Sheet:
 
 		Possible errors:
 			Raises a ValueError if the sheet does not exist.
-			Raises a scriptCallError if the call to the script fails.
+			Raises a ScriptCallError if the call to the script fails.
 
 		Note: This constructor should not be called by the user.  The user should instead call one of the 
 		open sheet functions from a spreadsheet object, which will then call this constructor.
@@ -152,15 +152,15 @@ class Sheet:
 		sheet in the parent spreadsheet.
 
 		Possible errors:
-			Raises a valueError if the sheet does not exist.
-			Raises a scriptCallError if the call to the script fails.
+			Raises a ValueError if the sheet does not exist.
+			Raises a ScriptCallError if the call to the script fails.
 
 		Note: This should not be called by the user, and should only be called
 		internally from the constructor.
 		"""
 		try:
 			_call_script(self.service, "checkSheetExists", [self.url, self.name])
-		except(scriptRuntimeError):
+		except(ScriptRuntimeError):
 			raise ValueError("Spreadsheet at URL " + self.url + " does not have a sheet called " + sheet_name + ".")
 
 	def get_matrix(self, r_offset, c_offset, n_rows, n_cols):
@@ -208,8 +208,8 @@ def _call_script(service, function_name, params):
 		Whatever the google apps script returns if the run is successful
 
 	Possible errors:
-		Raises a scriptCallError if the script errors before running
-		Raises a scriptRuntimeError if the script errors while running
+		Raises a ScriptCallError if the script errors before running
+		Raises a ScriptRuntimeError if the script errors while running
 
 	Note that this function should only be called internally.
 	"""
@@ -231,11 +231,11 @@ def _call_script(service, function_name, params):
 				error_message += "\nStacktrace:"
 				for trace in error['scriptStackTraceElements']:
 					error_message += "\n\t{0}: {1}".format(trace['function'], trace['lineNumber'])
-			raise scriptRuntimeError("Error while calling function " + function_name + " with parameters " + params + "\nError message: " + error_message)
+			raise ScriptRuntimeError("Error while calling function " + function_name + " with parameters " + params + "\nError message: " + error_message)
 		else:
 			# means the request went through without error, so return what the request returned
 			return response['response']['result']
 
 	except errors.HttpError as e:
 		# The API encountered a problem before the script started executing.
-		raise scriptCallError("Failed to call function " + function_name + " with parameters " + params + "\nError message: " + e.content)
+		raise ScriptCallError("Failed to call function " + function_name + " with parameters " + params + "\nError message: " + e.content)
