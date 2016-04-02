@@ -1,4 +1,6 @@
 from apiclient import errors
+from apiclient import discovery
+import httplib2
 
 class ScriptCallError(Exception):
 	"""An error caused by the script failing to run."""
