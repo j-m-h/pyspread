@@ -64,6 +64,7 @@ class Spreadsheet:
 	def __init__(self, url, user):
 		self._url = url
 		self.user = user
+		self._check_exists_and_permissions()
 
 	@property
 	def url(self):
@@ -179,7 +180,11 @@ class Sheet:
 		Returns a column (python list) of given parameters
 		GAS fn signature: getColumn(url, name, c)
 		"""
+<<<<<<< HEAD
 		return _call_script(self.service, 'getColumn', [self.url, self.name, col])
+=======
+		return _call_script(self.service, 'getColumn', [self.url, self.name, c, r_offset, n_rows, 1])
+>>>>>>> 12ac24dbeb26d3ff90a79a0b14d301c74a1e5bb0
 
 	def get_row(self, row):
 		"""
@@ -229,13 +234,20 @@ def _call_script(service, function_name, params):
 			error = response['error']['details'][0]
 			error_message = error['errorMessage']
 
+			print(response)
+			"""
 			if 'scriptStackTraceElements' in error:
 				# There may not be a stacktrace if the script didn't start executing.
 				error_message += "\nStacktrace:"
 				for trace in error['scriptStackTraceElements']:
 					error_message += "\n\t{0}: {1}".format(trace['function'], trace['lineNumber'])
+<<<<<<< HEAD
 			raise ScriptRuntimeError("Error while calling function " + function_name + " with parameters (" 
 				+ ",".join(str(e) for e in params) + ")\nError message: " + error_message)
+=======
+			raise ScriptRuntimeError("Error while calling function " + function_name + " with parameters " + str(params) + "\nError message: " + error_message)
+			"""
+>>>>>>> 12ac24dbeb26d3ff90a79a0b14d301c74a1e5bb0
 		else:
 			# means the request went through without error, so return what the request returned
 			if 'result' in response['response']:
@@ -243,5 +255,10 @@ def _call_script(service, function_name, params):
 
 	except errors.HttpError as e:
 		# The API encountered a problem before the script started executing.
+<<<<<<< HEAD
 		raise ScriptCallError("Failed to call function " + function_name + " with parameters (" 
 			+ ",".join(str(e) for e in params) + ")\nError message: " + e.content)
+=======
+		raise
+		#raise ScriptCallError("Failed to call function " + function_name + " with parameters " + str(params) + "\nError message: " + e.content)
+>>>>>>> 12ac24dbeb26d3ff90a79a0b14d301c74a1e5bb0
