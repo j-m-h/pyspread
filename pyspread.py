@@ -64,6 +64,7 @@ class Spreadsheet:
 	def __init__(self, url, user):
 		self._url = url
 		self.user = user
+		self._check_exists_and_permissions()
 
 	@property
 	def url(self):
@@ -179,7 +180,7 @@ class Sheet:
 		Returns a column (python list) of given parameters
 		GAS fn signature: getColumn(url, name, c, rOffset, nRows)
 		"""
-		return _call_script(self.service, 'getColumn', [self.url, self.name, c, r_offset, n_rows])
+		return _call_script(self.service, 'getColumn', [self.url, self.name, c, r_offset, n_rows, 1])
 
 	def get_row(self, r, c_offset, n_cols):
 		"""
@@ -231,12 +232,15 @@ def _call_script(service, function_name, params):
 			error = response['error']['details'][0]
 			error_message = error['errorMessage']
 
+			print(response)
+			"""
 			if 'scriptStackTraceElements' in error:
 				# There may not be a stacktrace if the script didn't start executing.
 				error_message += "\nStacktrace:"
 				for trace in error['scriptStackTraceElements']:
 					error_message += "\n\t{0}: {1}".format(trace['function'], trace['lineNumber'])
 			raise ScriptRuntimeError("Error while calling function " + function_name + " with parameters " + str(params) + "\nError message: " + error_message)
+			"""
 		else:
 			# means the request went through without error, so return what the request returned
 			#print(response)
@@ -245,4 +249,5 @@ def _call_script(service, function_name, params):
 
 	except errors.HttpError as e:
 		# The API encountered a problem before the script started executing.
-		raise ScriptCallError("Failed to call function " + function_name + " with parameters " + str(params) + "\nError message: " + e.content)
+		raise
+		#raise ScriptCallError("Failed to call function " + function_name + " with parameters " + str(params) + "\nError message: " + e.content)
