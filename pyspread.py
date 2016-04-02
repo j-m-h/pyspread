@@ -180,7 +180,9 @@ class Sheet:
 		Returns a column (python list) of given parameters
 		GAS fn signature: getColumn(url, name, c)
 		"""
-		return _call_script(self.service, 'getColumn', [self.url, self.name, col])
+		col = _call_script(self.service, 'getColumn', [self.url, self.name, col])
+		col = list(tuple(zip(*col))[0])
+		return col
 
 	def get_row(self, row):
 		"""
@@ -220,7 +222,11 @@ class Sheet:
 		"""Returns the last col in the spreadsheet with any values in it."""
 		return _call_script(self.service, "getMaxCol", [self.url, self.name])
 
+	def insert_rows_at_end(self, n):
+		return _call_script(self.service, "insertRowAtEnd", [self.url, self.name, n])
 
+	def insert_cols_at_end(self, n):
+		return _call_script(self.service, "insertColAtEnd", [self.url, self.name, n])
 
 
 def _call_script(service, function_name, params):
