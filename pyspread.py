@@ -45,14 +45,14 @@ def authorize(use_stored_credentials):
 	store = oauth2client.file.Storage(credential_path)
 	credentials = store.get()
 	if not credentials or credentials.invalid or not use_stored_credentials:
-        flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES)
-        flow.user_agent = APPLICATION_NAME
-        if flags:
-            credentials = tools.run_flow(flow, store, flags)
-        else: # Needed only for compatibility with Python 2.6
-            credentials = tools.run(flow, store)
-    credentials.refresh(httplib2.Http()) # prevents the credentials from timing out
-    http = credentials.authorize(httplib2.Http())
+		flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES)
+		flow.user_agent = APPLICATION_NAME
+		if flags:
+			credentials = tools.run_flow(flow, store, flags)
+		else: # Needed only for compatibility with Python 2.6
+			credentials = tools.run(flow, store)
+	credentials.refresh(httplib2.Http()) # prevents the credentials from timing out
+	http = credentials.authorize(httplib2.Http())
 	service = discovery.build('script', 'v1', http=http)
 	return User(service)
 
