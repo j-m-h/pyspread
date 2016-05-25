@@ -1,6 +1,20 @@
 from apiclient import errors
 from apiclient import discovery
 import httplib2
+import os
+import oauth2client
+from oauth2client import client
+from oauth2client import tools
+
+try:
+	import argparse
+	flags = argparse.ArgumentParser(parents=[tools.argparser]).parse_args()
+except ImportError:
+	flags = None
+
+SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets']
+CLIENT_SECRET_FILE = 'client.json'
+APPLICATION_NAME = "PySpread"
 
 class ScriptCallError(Exception):
 	"""An error caused by the script failing to run."""
@@ -9,17 +23,36 @@ class ScriptRuntimeError(Exception):
 	"""An error raised by the script during execution."""
 	pass # everything can be inherited from Exception
 
-def authorize(credentials):
-	"""Given a set of credentials, creates a service object and returns
-	a user object that has these credentials.
+def authorize(use_stored_credentials):
+	"""Creates a new user object.
+	Authentication portions are adapted from the google tutorial on calling scripts: 
+	 https://developers.google.com/apps-script/guides/rest/quickstart/python#step_3_set_up_the_sample
 
 	Params:
-		credentials: a set of OAuth2 credentials
+		use_stored_credentials: If passed in as a true value, will create the 
+		 user object based off the credentials stored by the most recent run 
+		 of authorize, if there are any.  If it is false, or if there are no 
+		 stored credentials, will run an oauth flow to get credentials.
 
 	Returns:
-		A User object, which will have the proper permissions.
+		A new User object
 	"""
-	http = credentials.authorize(httplib2.Http())
+	home_dir = os.path.expanduser('~')
+	credential_dir = os.path.join(home_dir, '.credentials')
+	if not os.path.exists(credential_dir):
+		os.makedirs(credential_dir) # if not storing or using credentials, no need to create the folder
+	credential_path = os.path.join(credential_dir, 'pyspread_cred.json')
+	store = oauth2client.file.Storage(credential_path)
+	credentials = store.get()
+	if not credentials or credentials.invalid or not use_stored_credentials:
+        flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES)
+        flow.user_agent = APPLICATION_NAME
+        if flags:
+            credentials = tools.run_flow(flow, store, flags)
+        else: # Needed only for compatibility with Python 2.6
+            credentials = tools.run(flow, store)
+    credentials.refresh(httplib2.Http()) # prevents the credentials from timing out
+    http = credentials.authorize(httplib2.Http())
 	service = discovery.build('script', 'v1', http=http)
 	return User(service)
 

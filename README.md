@@ -1,22 +1,23 @@
 # pyspread
 A utility for writing to google spreadsheets from Python
 
-GAScript code can be found [here](https://script.google.com/d/1FRsJtZnBumIjvsSxPOJ86S_eTpl-zPqsHtoCpjuO7cH7QiZMjIh_Ddn7/edit?usp=sharing_eid&ts=56ff73f5).
+Note that pyspread is still under development, and is not fully functional yet.
 
 ### Dependencies
-You must have the python libraries apiclient and httplib2 installed.
+* apiclient (pip install google-api-python-client or get from [Google Developers](https://developers.google.com/api-client-library/python/start/installation))
+* oauth2client (pip install oauth2client or get from [Github](https://github.com/google/oauth2client))
+* httplib2 (pip install httplib2 or get from [Github](https://github.com/httplib2/httplib2))
 
 ### How to use pyspread
-1. Obtain OAuth 2.0 Credentials, as explained [here](http://gspread.readthedocs.org/en/latest/oauth2.html).
-2. Create a User object by calling pyspread.authorize on your credentials.
-3. Create a Spreadsheet object by calling open_by_url or open_by_key from your User object.
+1. Create a User object by calling pyspread.authorize.
+2. Create a Spreadsheet object by calling open_by_url or open_by_key from your User object.
   * Once you have a Spreadsheet, you can call get_sheet_names to get a list of all the sheets.
-4. Create a Sheet object by calling get_sheet from your Spreadsheet object.
+3. Create a Sheet object by calling get_sheet from your Spreadsheet object.
   * Now that you have a sheet, you can start using any of the public facing methods (described below).
 
-An example of how to use pyspread, once you have your credentials:
+An example of how to use pyspread:
 ```python
-user = pyspread.authorize(credentials) # Create the User object
+user = pyspread.authorize(True) # Create the User object, using stored credentials
 ss = user.open_by_key("1VB8V2MdhyBQdvxMxssjGkk_8Yq9OY60VtNiOfTJXJsc") # Create the Spreadsheet object
 sheet_names = ss.get_sheet_names() # Fetch all sheet names from the Spreadsheet
 print("Sheet names:")
@@ -35,7 +36,7 @@ print(sheet.get_cell_value(1, 2)) # Print out the value in cell B1
 
 ### Public facing methods
 ###### pyspread
-`authorize(credentials)`: Used to create a User object, given a set of OAuth2.0 credentials.  
+`authorize(use_stored_credentials)`: Used to create a User object.  If use_stored_credentials is true, will create the user object using credentials previously stored by authorize.  If it is false or there are no stored credentials, will run an OAuth authorization flow.  
   Returns: A User object
 
 ###### User
